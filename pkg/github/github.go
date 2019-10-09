@@ -226,6 +226,8 @@ func (client *Client) GetSettingsFromGithub(owner string, name string) (*Setting
 					},
 				},
 			})
+		} else {
+			branchesSettings = append(branchesSettings, branch{Name: githubBranch.GetName()})
 		}
 	}
 
