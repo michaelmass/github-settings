@@ -108,8 +108,19 @@ func GetSettingsFromFile(file string) (*Settings, error) {
 		return nil, errors.Wrap(err, "Error while reading settings file")
 	}
 
+	settings, err := GetSettingsFromBytes(content)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "Error decoding settings content")
+	}
+
+	return settings, nil
+}
+
+// GetSettingsFromBytes parse byte array containing settings
+func GetSettingsFromBytes(content []byte) (*Settings, error) {
 	var settings Settings
-	err = yaml.Unmarshal(content, &settings)
+	err := yaml.Unmarshal(content, &settings)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "Error while unmarshal settings")
