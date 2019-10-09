@@ -61,6 +61,7 @@ type branch struct {
 }
 
 type protection struct {
+	Enabled                      bool
 	EnforceAdmins                bool
 	RequiredApprovingReviewCount requiredApprovingReviewCount
 	RequiredStatusChecks         requiredStatusChecks
@@ -116,6 +117,7 @@ func GetSettingsFromFile(file string) (*Settings, error) {
 
 	for i, branch := range settings.Branches {
 		if branch.Protection.RequiredApprovingReviewCount.RequiredApprovingReviewCount == 0 {
+			settings.Branches[i].Protection.Enabled = true
 			settings.Branches[i].Protection.RequiredApprovingReviewCount.DismissStaleReviews = false
 			settings.Branches[i].Protection.RequiredApprovingReviewCount.RequireCodeOwnerReviews = false
 		}
@@ -218,6 +220,7 @@ func (client *Client) GetSettingsFromGithub(owner string, name string) (*Setting
 			branchesSettings = append(branchesSettings, branch{
 				Name: githubBranch.GetName(),
 				Protection: protection{
+					Enabled:                      true,
 					EnforceAdmins:                githubProtection.GetEnforceAdmins().Enabled,
 					RequiredApprovingReviewCount: requiredReview,
 					RequiredStatusChecks: requiredStatusChecks{

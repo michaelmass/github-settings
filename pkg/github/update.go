@@ -130,7 +130,9 @@ func (client *Client) updateBranchSettings(owner string, name string, githubBran
 	deleteBranchesMap := map[string]branch{}
 
 	for _, githubBranch := range githubBranches {
-		deleteBranchesMap[githubBranch.Name] = githubBranch
+		if githubBranch.Protection.Enabled {
+			deleteBranchesMap[githubBranch.Name] = githubBranch
+		}
 	}
 
 	for _, branchSettings := range branchesSettings {
