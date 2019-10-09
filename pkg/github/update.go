@@ -130,9 +130,7 @@ func (client *Client) updateBranchSettings(owner string, name string, githubBran
 	deleteBranchesMap := map[string]branch{}
 
 	for _, githubBranch := range githubBranches {
-		if githubBranch.Protection.Enabled {
-			deleteBranchesMap[githubBranch.Name] = githubBranch
-		}
+		deleteBranchesMap[githubBranch.Name] = githubBranch
 	}
 
 	for _, branchSettings := range branchesSettings {
@@ -157,10 +155,14 @@ func (client *Client) updateBranchSettings(owner string, name string, githubBran
 		}
 	}
 
-	for branchToDelete := range deleteBranchesMap {
-		log.Printf("[INFO] Removing branch protection for %s\n", branchToDelete)
+	for branchToDeleteName, branchToDelete := range deleteBranchesMap {
+		log.Printf("[INFO] Removing branch protection for %s\n", branchToDeleteName)
 
-		_, err := client.github.Repositories.RemoveBranchProtection(context.Background(), owner, name, branchToDelete)
+		if !branchToDelete.Protection.Enabled {
+			continue
+		}
+
+		_, err := client.github.Repositories.RemoveBranchProtection(context.Background(), owner, name, branchToDeleteName)
 
 		if err != nil {
 			return errors.Wrap(err, "Error removing branch protection\n")
