@@ -127,8 +127,10 @@ func (client *Client) updateLabels(owner, name string, githubLabels, labelsSetti
 
 func (client *Client) updateBranchSettings(owner string, name string, githubBranches []branch, branchesSettings []branch) error {
 	branchesToUpdate := []branch{}
+	branchesToCreate := []string{}
 	deleteBranchesMap := map[string]branch{}
 
+	// Add all github branch that exist except the branch without protection
 	for _, githubBranch := range githubBranches {
 		deleteBranchesMap[githubBranch.Name] = githubBranch
 	}
@@ -137,14 +139,7 @@ func (client *Client) updateBranchSettings(owner string, name string, githubBran
 		githubBranch, ok := deleteBranchesMap[branchSettings.Name]
 
 		if !ok {
-			log.Printf("[INFO] Creating new branch %s\n", branchSettings.Name)
-
-			err := client.createBranch(branchSettings.Name, fmtGithubURL(owner, name, client.token))
-
-			if err != nil {
-				return errors.Wrap(err, "Error creating branch\n")
-			}
-
+			branchesToCreate = append(branchesToCreate, branchSettings.Name)
 			branchesToUpdate = append(branchesToUpdate, branchSettings)
 		} else {
 			delete(deleteBranchesMap, branchSettings.Name)
@@ -155,12 +150,21 @@ func (client *Client) updateBranchSettings(owner string, name string, githubBran
 		}
 	}
 
-	for branchToDeleteName, branchToDelete := range deleteBranchesMap {
-		log.Printf("[INFO] Removing branch protection for %s\n", branchToDeleteName)
+	if len(branchesToCreate) != 0 {
+		log.Print("[INFO] Creating new branches\n")
+		err := client.createBranch(branchesToCreate, fmtGithubURL(owner, name, client.token))
 
+		if err != nil {
+			return errors.Wrap(err, "Error creating branches\n")
+		}
+	}
+
+	for branchToDeleteName, branchToDelete := range deleteBranchesMap {
 		if !branchToDelete.Protection.Enabled {
 			continue
 		}
+
+		log.Printf("[INFO] Removing branch protection for %s\n", branchToDeleteName)
 
 		_, err := client.github.Repositories.RemoveBranchProtection(context.Background(), owner, name, branchToDeleteName)
 

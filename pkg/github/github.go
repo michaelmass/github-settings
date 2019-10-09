@@ -277,7 +277,7 @@ func (client *Client) GetSettingsFromGithub(owner string, name string) (*Setting
 	}, nil
 }
 
-func (client *Client) createBranch(branch string, url string) error {
+func (client *Client) createBranch(branches []string, url string) error {
 	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: url,
 	})
@@ -292,16 +292,18 @@ func (client *Client) createBranch(branch string, url string) error {
 		return errors.Wrap(err, "Error getting repository head")
 	}
 
-	err = repo.Storer.SetReference(plumbing.NewHashReference(plumbing.ReferenceName("refs/heads/"+branch), headRef.Hash()))
+	for _, branch := range branches {
+		err = repo.Storer.SetReference(plumbing.NewHashReference(plumbing.ReferenceName("refs/heads/"+branch), headRef.Hash()))
 
-	if err != nil {
-		return errors.Wrap(err, "Error setting reference storer")
-	}
+		if err != nil {
+			return errors.Wrapf(err, "Error setting reference storer for branch %s", branch)
+		}
 
-	err = repo.Push(&git.PushOptions{})
+		err = repo.Push(&git.PushOptions{})
 
-	if err != nil {
-		return errors.Wrap(err, "Error pushing reference")
+		if err != nil {
+			return errors.Wrapf(err, "Error pushing reference for branch %s", branch)
+		}
 	}
 
 	return nil
