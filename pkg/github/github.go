@@ -116,8 +116,8 @@ func GetSettingsFromFile(file string) (*Settings, error) {
 	}
 
 	for i, branch := range settings.Branches {
+		settings.Branches[i].Protection.Enabled = true
 		if branch.Protection.RequiredApprovingReviewCount.RequiredApprovingReviewCount == 0 {
-			settings.Branches[i].Protection.Enabled = true
 			settings.Branches[i].Protection.RequiredApprovingReviewCount.DismissStaleReviews = false
 			settings.Branches[i].Protection.RequiredApprovingReviewCount.RequireCodeOwnerReviews = false
 		}
