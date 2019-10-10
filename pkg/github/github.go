@@ -23,11 +23,21 @@ type Client struct {
 
 // Settings contains the settings to be apply to a github repository
 type Settings struct {
+	Disable    Disabled
 	Repository repository
 	Labels     []label
 	Branches   []branch
 	Webhooks   []webhook
 	Topics     []string
+}
+
+// Disabled specify if a functionnality sould be disabled
+type Disabled struct {
+	Repository bool
+	Labels     bool
+	Branches   bool
+	Webhooks   bool
+	Topics     bool
 }
 
 type repository struct {
@@ -145,31 +155,31 @@ func (client *Client) Apply(settings *Settings) error {
 		return errors.Wrap(err, "Error getting settings from github")
 	}
 
-	err = client.updateRepoSettings(settings.Repository.Owner, settings.Repository.Name, githubSettings.Repository, settings.Repository)
+	err = client.updateRepoSettings(settings.Disable.Repository, settings.Repository.Owner, settings.Repository.Name, githubSettings.Repository, settings.Repository)
 
 	if err != nil {
 		return errors.Wrap(err, "Error updating repository settings")
 	}
 
-	err = client.updateLabels(settings.Repository.Owner, settings.Repository.Name, githubSettings.Labels, settings.Labels)
+	err = client.updateLabels(settings.Disable.Labels, settings.Repository.Owner, settings.Repository.Name, githubSettings.Labels, settings.Labels)
 
 	if err != nil {
 		return errors.Wrap(err, "Error updating repository labels")
 	}
 
-	err = client.updateBranchSettings(settings.Repository.Owner, settings.Repository.Name, githubSettings.Branches, settings.Branches)
+	err = client.updateBranchSettings(settings.Disable.Branches, settings.Repository.Owner, settings.Repository.Name, githubSettings.Branches, settings.Branches)
 
 	if err != nil {
 		return errors.Wrap(err, "Error updating repository branches protection")
 	}
 
-	err = client.updateWebhooks(settings.Repository.Owner, settings.Repository.Name, githubSettings.Webhooks, settings.Webhooks)
+	err = client.updateWebhooks(settings.Disable.Webhooks, settings.Repository.Owner, settings.Repository.Name, githubSettings.Webhooks, settings.Webhooks)
 
 	if err != nil {
 		return errors.Wrap(err, "Error updating repository webhooks")
 	}
 
-	err = client.updateTopicsSettings(settings.Repository.Owner, settings.Repository.Name, githubSettings.Topics, settings.Topics)
+	err = client.updateTopicsSettings(settings.Disable.Topics, settings.Repository.Owner, settings.Repository.Name, githubSettings.Topics, settings.Topics)
 
 	if err != nil {
 		return errors.Wrap(err, "Error updating repository topics")

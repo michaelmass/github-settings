@@ -11,7 +11,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (client *Client) updateTopicsSettings(owner, name string, githubTopics, topics []string) error {
+func (client *Client) updateTopicsSettings(disabled bool, owner, name string, githubTopics, topics []string) error {
+	if disabled {
+		log.Print("[INFO] Skipping disabled repository topics\n")
+		return nil
+	}
+
 	sort.Strings(githubTopics)
 	sort.Strings(topics)
 
@@ -30,7 +35,12 @@ func (client *Client) updateTopicsSettings(owner, name string, githubTopics, top
 	return nil
 }
 
-func (client *Client) updateRepoSettings(owner, name string, githubRepo, repo repository) error {
+func (client *Client) updateRepoSettings(disabled bool, owner, name string, githubRepo, repo repository) error {
+	if disabled {
+		log.Print("[INFO] Skipping disabled repository settings\n")
+		return nil
+	}
+
 	if reflect.DeepEqual(githubRepo, repo) {
 		return nil
 	}
@@ -61,7 +71,12 @@ func (client *Client) updateRepoSettings(owner, name string, githubRepo, repo re
 	return nil
 }
 
-func (client *Client) updateLabels(owner, name string, githubLabels, labelsSettings []label) error {
+func (client *Client) updateLabels(disabled bool, owner, name string, githubLabels, labelsSettings []label) error {
+	if disabled {
+		log.Print("[INFO] Skipping disabled repository labels\n")
+		return nil
+	}
+
 	labelsToCreate := []label{}
 	labelsToUpdate := []label{}
 	deleteLabelMap := map[string]label{}
@@ -125,7 +140,12 @@ func (client *Client) updateLabels(owner, name string, githubLabels, labelsSetti
 	return nil
 }
 
-func (client *Client) updateBranchSettings(owner string, name string, githubBranches []branch, branchesSettings []branch) error {
+func (client *Client) updateBranchSettings(disabled bool, owner string, name string, githubBranches []branch, branchesSettings []branch) error {
+	if disabled {
+		log.Print("[INFO] Skipping disabled repository branches\n")
+		return nil
+	}
+
 	branchesToUpdate := []branch{}
 	branchesToCreate := []string{}
 	deleteBranchesMap := map[string]branch{}
@@ -205,7 +225,12 @@ func (client *Client) updateBranchSettings(owner string, name string, githubBran
 	return nil
 }
 
-func (client *Client) updateWebhooks(owner string, name string, githubWebhooks []webhook, webhooksSettings []webhook) error {
+func (client *Client) updateWebhooks(disabled bool, owner string, name string, githubWebhooks []webhook, webhooksSettings []webhook) error {
+	if disabled {
+		log.Print("[INFO] Skipping disabled repository webhooks\n")
+		return nil
+	}
+
 	webhooksToUpdate := []webhook{}
 	deleteWebhooksMap := map[string]webhook{}
 
